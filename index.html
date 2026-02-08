@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReeznLive | Premium Streaming</title>
+    
+    <meta name="description" content="ReeznLive - Watch Live TV, Sports, and Movies.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap');
+        
+        body {
+            background-color: #080808;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            height: 70vh;
+            background: url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=2069&auto=format&fit=crop') no-repeat center center/cover;
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-top: 80px; /* Offset for fixed header */
+        }
+
+        .hero-overlay {
+            background: linear-gradient(90deg, #000000 0%, rgba(0,0,0,0.8) 50%, transparent 100%);
+            position: absolute;
+            inset: 0;
+        }
+
+        .hero-bottom-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to top, #080808, transparent);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #e90020;
+            color: white;
+            padding: 12px 32px;
+            font-weight: 700;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .btn-primary:hover {
+            background-color: #b00018;
+            transform: scale(1.02);
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            padding: 8px 20px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+        .btn-outline:hover {
+            border-color: #e90020;
+            background: rgba(233, 0, 32, 0.1);
+        }
+
+        /* Tabs */
+        .tab-btn {
+            padding: 10px 24px;
+            font-weight: 700;
+            color: #888;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover { color: white; }
+        .tab-btn.active {
+            color: #e90020;
+            border-bottom-color: #e90020;
+        }
+
+        /* Cards */
+        .playlist-card {
+            background: #141414;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .playlist-card:hover {
+            transform: translateY(-5px);
+            border-color: #e90020;
+        }
+
+        .card-img {
+            height: 100px;
+            background-color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #222;
+            overflow: hidden;
+        }
+        
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .playlist-card:hover .card-img img {
+            opacity: 1;
+        }
+
+        .card-info { padding: 12px; }
+        
+        /* Navigation (Fixed Dark Mode) */
+        nav { 
+            background-color: #080808; 
+            border-bottom: 1px solid #222;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav id="navbar" class="fixed w-full top-0 z-50 h-20 flex items-center px-6 md:px-12">
+        <div class="flex items-center gap-1 mr-12">
+            <span class="text-2xl font-black tracking-tighter text-white">REEZN</span>
+            <span class="text-2xl font-black tracking-tighter text-[#e90020]">LIVE</span>
+        </div>
+        
+        <div class="hidden md:flex gap-8 text-sm font-semibold text-gray-400">
+            <a href="#" class="text-white">Home</a>
+            <a href="#content-area" class="hover:text-white transition">Live TV</a>
+        </div>
+
+        <div class="ml-auto flex items-center gap-6">
+            <a href="#" class="btn-outline">
+                <i data-lucide="smartphone" class="w-4 h-4"></i> Download App
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container mx-auto px-6 md:px-12 relative z-10">
+            <div class="max-w-2xl">
+                <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">
+                    UNLIMITED <br> ENTERTAINMENT
+                </h1>
+                <p class="text-gray-300 text-lg mb-8 leading-relaxed max-w-lg">
+                    Access thousands of live channels, movies, and sports events. 
+                    High definition streaming with zero latency.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#content-area" class="btn-primary">
+                        <i data-lucide="play" class="fill-current w-4 h-4"></i> Start Watching
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bottom-fade"></div>
+    </header>
+
+    <main id="content-area" class="container mx-auto px-6 md:px-12 py-12 -mt-20 relative z-20">
+        
+        <div class="bg-[#080808] min-h-screen"> 
+            <div class="flex flex-col md:flex-row items-end justify-between mb-8 pb-4 border-b border-[#222]">
+                <div class="flex gap-6">
+                    <button class="tab-btn active" onclick="switchTab('categories')">CATEGORIES</button>
+                    <button class="tab-btn" onclick="switchTab('countries')">COUNTRIES</button>
+                </div>
+                
+                <div class="relative mt-4 md:mt-0">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
+                    <input type="text" id="global-search" placeholder="Search..." 
+                           class="bg-[#141414] border border-[#333] rounded-full pl-10 pr-4 py-2 text-sm focus:border-[#e90020] outline-none text-white w-64 transition-colors">
+                </div>
+            </div>
+
+            <div id="grid-categories" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                <a href="player.html?playlist=https://iptv-org.github.io/iptv/index.m3u" class="playlist-card group item-card" data-name="All Channels">
+                    <div class="card-img bg-[#e90020]/10 flex items-center justify-center">
+                        <i data-lucide="layers" class="w-8 h-8 text-[#e90020]"></i>
+                    </div>
+                    <div class="card-info"><h4 class="font-bold text-sm">All Channels</h4></div>
+                </a>
+                </div>
+
+            <div id="grid-countries" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 hidden">
+                </div>
+
+        </div>
+
+    </main>
+
+    <footer class="bg-black py-12 border-t border-[#222] mt-12">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0 flex items-center gap-1">
+                    <span class="text-xl font-black text-white">REEZN</span>
+                    <span class="text-xl font-black text-[#e90020]">LIVE</span>
+                </div>
+                <div class="text-gray-600 text-sm">
+                    © 2026 ReeznLive Media. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DATA SETS
+        const categories = [
+            {n:"Animation", u:"https://iptv-org.github.io/iptv/categories/animation.m3u", i:"ghost"},
+            {n:"Auto", u:"https://iptv-org.github.io/iptv/categories/auto.m3u", i:"car"},
+            {n:"Business", u:"https://iptv-org.github.io/iptv/categories/business.m3u", i:"briefcase"},
+            {n:"Classic", u:"https://iptv-org.github.io/iptv/categories/classic.m3u", i:"film"},
+            {n:"Comedy", u:"https://iptv-org.github.io/iptv/categories/comedy.m3u", i:"smile"},
+            {n:"Cooking", u:"https://iptv-org.github.io/iptv/categories/cooking.m3u", i:"chef-hat"},
+            {n:"Culture", u:"https://iptv-org.github.io/iptv/categories/culture.m3u", i:"landmark"},
+            {n:"Documentary", u:"https://iptv-org.github.io/iptv/categories/documentary.m3u", i:"book"},
+            {n:"Education", u:"https://iptv-org.github.io/iptv/categories/education.m3u", i:"graduation-cap"},
+            {n:"Entertainment", u:"https://iptv-org.github.io/iptv/categories/entertainment.m3u", i:"tv"},
+            {n:"Family", u:"https://iptv-org.github.io/iptv/categories/family.m3u", i:"users"},
+            {n:"General", u:"https://iptv-org.github.io/iptv/categories/general.m3u", i:"globe"},
+            {n:"Interactive", u:"https://iptv-org.github.io/iptv/categories/interactive.m3u", i:"mouse-pointer"},
+            {n:"Kids", u:"https://iptv-org.github.io/iptv/categories/kids.m3u", i:"baby"},
+            {n:"Legislative", u:"https://iptv-org.github.io/iptv/categories/legislative.m3u", i:"gavel"},
+            {n:"Lifestyle", u:"https://iptv-org.github.io/iptv/categories/lifestyle.m3u", i:"coffee"},
+            {n:"Movies", u:"https://iptv-org.github.io/iptv/categories/movies.m3u", i:"clapperboard"},
+            {n:"Music", u:"https://iptv-org.github.io/iptv/categories/music.m3u", i:"music"},
+            {n:"News", u:"https://iptv-org.github.io/iptv/categories/news.m3u", i:"newspaper"},
+            {n:"Outdoor", u:"https://iptv-org.github.io/iptv/categories/outdoor.m3u", i:"tent"},
+            {n:"Public", u:"https://iptv-org.github.io/iptv/categories/public.m3u", i:"users"},
+            {n:"Relax", u:"https://iptv-org.github.io/iptv/categories/relax.m3u", i:"sun"},
+            {n:"Religious", u:"https://iptv-org.github.io/iptv/categories/religious.m3u", i:"church"},
+            {n:"Science", u:"https://iptv-org.github.io/iptv/categories/science.m3u", i:"flask-conical"},
+            {n:"Series", u:"https://iptv-org.github.io/iptv/categories/series.m3u", i:"tv-2"},
+            {n:"Shop", u:"https://iptv-org.github.io/iptv/categories/shop.m3u", i:"shopping-bag"},
+            {n:"Sports", u:"https://iptv-org.github.io/iptv/categories/sports.m3u", i:"trophy"},
+            {n:"Travel", u:"https://iptv-org.github.io/iptv/categories/travel.m3u", i:"plane"},
+            {n:"Weather", u:"https://iptv-org.github.io/iptv/categories/weather.m3u", i:"cloud"},
+        ];
+
+        const countries = [
+            {n:"Afghanistan", u:"af"}, {n:"Albania", u:"al"}, {n:"Algeria", u:"dz"}, 
+            {n:"Andorra", u:"ad"}, {n:"Angola", u:"ao"}, {n:"Argentina", u:"ar"},
+            {n:"Armenia", u:"am"}, {n:"Aruba", u:"aw"}, {n:"Australia", u:"au"},
+            {n:"Austria", u:"at"}, {n:"Azerbaijan", u:"az"}, {n:"Bahamas", u:"bs"},
+            {n:"Bahrain", u:"bh"}, {n:"Bangladesh", u:"bd"}, {n:"Barbados", u:"bb"},
+            {n:"Belarus", u:"by"}, {n:"Belgium", u:"be"}, {n:"Belize", u:"bz"},
+            {n:"Benin", u:"bj"}, {n:"Bermuda", u:"bm"}, {n:"Bolivia", u:"bo"},
+            {n:"Bonaire", u:"bq"}, {n:"Bosnia", u:"ba"}, {n:"Brazil", u:"br"},
+            {n:"British Virgin Islands", u:"vg"}, {n:"Brunei", u:"bn"}, {n:"Bulgaria", u:"bg"},
+            {n:"Burkina Faso", u:"bf"}, {n:"Cambodia", u:"kh"}, {n:"Cameroon", u:"cm"},
+            {n:"Canada", u:"ca"}, {n:"Cape Verde", u:"cv"}, {n:"Chad", u:"td"},
+            {n:"Chile", u:"cl"}, {n:"China", u:"cn"}, {n:"Colombia", u:"co"},
+            {n:"Comoros", u:"km"}, {n:"Costa Rica", u:"cr"}, {n:"Croatia", u:"hr"},
+            {n:"Cuba", u:"cu"}, {n:"Curacao", u:"cw"}, {n:"Cyprus", u:"cy"},
+            {n:"Czech Republic", u:"cz"}, {n:"DR Congo", u:"cd"}, {n:"Denmark", u:"dk"},
+            {n:"Djibouti", u:"dj"}, {n:"Dominican Republic", u:"do"}, {n:"Ecuador", u:"ec"},
+            {n:"Egypt", u:"eg"}, {n:"El Salvador", u:"sv"}, {n:"Equatorial Guinea", u:"gq"},
+            {n:"Eritrea", u:"er"}, {n:"Estonia", u:"ee"}, {n:"Ethiopia", u:"et"},
+            {n:"Faroe Islands", u:"fo"}, {n:"Finland", u:"fi"}, {n:"France", u:"fr"},
+            {n:"French Guiana", u:"gf"}, {n:"French Polynesia", u:"pf"}, {n:"Gambia", u:"gm"},
+            {n:"Georgia", u:"ge"}, {n:"Germany", u:"de"}, {n:"Ghana", u:"gh"},
+            {n:"Greece", u:"gr"}, {n:"Guadeloupe", u:"gp"}, {n:"Guam", u:"gu"},
+            {n:"Guatemala", u:"gt"}, {n:"Guernsey", u:"gg"}, {n:"Guinea", u:"gn"},
+            {n:"Guyana", u:"gy"}, {n:"Haiti", u:"ht"}, {n:"Honduras", u:"hn"},
+            {n:"Hong Kong", u:"hk"}, {n:"Hungary", u:"hu"}, {n:"Iceland", u:"is"},
+            {n:"India", u:"in"}, {n:"Indonesia", u:"id"}, {n:"Iran", u:"ir"},
+            {n:"Iraq", u:"iq"}, {n:"Ireland", u:"ie"}, {n:"Israel", u:"il"},
+            {n:"Italy", u:"it"}, {n:"Ivory Coast", u:"ci"}, {n:"Jamaica", u:"jm"},
+            {n:"Japan", u:"jp"}, {n:"Jordan", u:"jo"}, {n:"Kazakhstan", u:"kz"},
+            {n:"Kenya", u:"ke"}, {n:"Kosovo", u:"xk"}, {n:"Kuwait", u:"kw"},
+            {n:"Kyrgyzstan", u:"kg"}, {n:"Laos", u:"la"}, {n:"Latvia", u:"lv"},
+            {n:"Lebanon", u:"lb"}, {n:"Liberia", u:"lr"}, {n:"Libya", u:"ly"},
+            {n:"Liechtenstein", u:"li"}, {n:"Lithuania", u:"lt"}, {n:"Luxembourg", u:"lu"},
+            {n:"Macao", u:"mo"}, {n:"Madagascar", u:"mg"}, {n:"Malaysia", u:"my"},
+            {n:"Maldives", u:"mv"}, {n:"Mali", u:"ml"}, {n:"Malta", u:"mt"},
+            {n:"Martinique", u:"mq"}, {n:"Mauritania", u:"mr"}, {n:"Mauritius", u:"mu"},
+            {n:"Mexico", u:"mx"}, {n:"Moldova", u:"md"}, {n:"Monaco", u:"mc"},
+            {n:"Mongolia", u:"mn"}, {n:"Montenegro", u:"me"}, {n:"Morocco", u:"ma"},
+            {n:"Mozambique", u:"mz"}, {n:"Myanmar", u:"mm"}, {n:"Namibia", u:"na"},
+            {n:"Nepal", u:"np"}, {n:"Netherlands", u:"nl"}, {n:"New Zealand", u:"nz"},
+            {n:"Nicaragua", u:"ni"}, {n:"Niger", u:"ne"}, {n:"Nigeria", u:"ng"},
+            {n:"North Korea", u:"kp"}, {n:"North Macedonia", u:"mk"}, {n:"Norway", u:"no"},
+            {n:"Oman", u:"om"}, {n:"Pakistan", u:"pk"}, {n:"Palestine", u:"ps"},
+            {n:"Panama", u:"pa"}, {n:"Papua New Guinea", u:"pg"}, {n:"Paraguay", u:"py"},
+            {n:"Peru", u:"pe"}, {n:"Philippines", u:"ph"}, {n:"Poland", u:"pl"},
+            {n:"Portugal", u:"pt"}, {n:"Puerto Rico", u:"pr"}, {n:"Qatar", u:"qa"},
+            {n:"Rep. Congo", u:"cg"}, {n:"Reunion", u:"re"}, {n:"Romania", u:"ro"},
+            {n:"Russia", u:"ru"}, {n:"Rwanda", u:"rw"}, {n:"St Kitts Nevis", u:"kn"},
+            {n:"Saint Lucia", u:"lc"}, {n:"Samoa", u:"ws"}, {n:"San Marino", u:"sm"},
+            {n:"Saudi Arabia", u:"sa"}, {n:"Senegal", u:"sn"}, {n:"Serbia", u:"rs"},
+            {n:"Singapore", u:"sg"}, {n:"Sint Maarten", u:"sx"}, {n:"Slovakia", u:"sk"},
+            {n:"Slovenia", u:"si"}, {n:"Somalia", u:"so"}, {n:"South Africa", u:"za"},
+            {n:"South Korea", u:"kr"}, {n:"Spain", u:"es"}, {n:"Sri Lanka", u:"lk"},
+            {n:"Sudan", u:"sd"}, {n:"Suriname", u:"sr"}, {n:"Sweden", u:"se"},
+            {n:"Switzerland", u:"ch"}, {n:"Syria", u:"sy"}, {n:"Taiwan", u:"tw"},
+            {n:"Tajikistan", u:"tj"}, {n:"Tanzania", u:"tz"}, {n:"Thailand", u:"th"},
+            {n:"Togo", u:"tg"}, {n:"Trinidad Tobago", u:"tt"}, {n:"Tunisia", u:"tn"},
+            {n:"Turkiye", u:"tr"}, {n:"Turkmenistan", u:"tm"}, {n:"Uganda", u:"ug"},
+            {n:"Ukraine", u:"ua"}, {n:"UAE", u:"ae"}, {n:"UK", u:"gb"},
+            {n:"USA", u:"us"}, {n:"Uruguay", u:"uy"}, {n:"Uzbekistan", u:"uz"},
+            {n:"Vatican", u:"va"}, {n:"Venezuela", u:"ve"}, {n:"Vietnam", u:"vn"},
+            {n:"Western Sahara", u:"eh"}, {n:"Yemen", u:"ye"}, {n:"Zimbabwe", u:"zw"},
+        ];
+
+        // INIT & RENDER
+        const catGrid = document.getElementById('grid-categories');
+        const countryGrid = document.getElementById('grid-countries');
+        
+        function init() {
+            // Render Categories
+            categories.forEach(c => {
+                const el = document.createElement('a');
+                el.href = `player.html?playlist=${c.u}`;
+                el.className = 'playlist-card group item-card';
+                el.setAttribute('data-name', c.n);
+                el.innerHTML = `
+                    <div class="card-img flex items-center justify-center">
+                        <i data-lucide="${c.i}" class="w-8 h-8 text-gray-600 group-hover:text-white transition"></i>
+                    </div>
+                    <div class="card-info"><h4 class="font-bold text-sm">${c.n}</h4></div>
+                `;
+                catGrid.appendChild(el);
+            });
+
+            // Render Countries with SVG Flags
+            countries.forEach(c => {
+                const el = document.createElement('a');
+                el.href = `player.html?playlist=https://iptv-org.github.io/iptv/countries/${c.u}.m3u`;
+                el.className = 'playlist-card group item-card';
+                el.setAttribute('data-name', c.n);
+                el.innerHTML = `
+                    <div class="card-img">
+                        <img src="https://flagcdn.com/${c.u}.svg" alt="${c.n}">
+                    </div>
+                    <div class="card-info"><h4 class="font-bold text-sm truncate">${c.n}</h4></div>
+                `;
+                countryGrid.appendChild(el);
+            });
+
+            lucide.createIcons();
+        }
+
+        // TABS
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if(tab === 'categories') {
+                catGrid.classList.remove('hidden');
+                countryGrid.classList.add('hidden');
+            } else {
+                catGrid.classList.add('hidden');
+                countryGrid.classList.remove('hidden');
+            }
+        };
+
+        // SEARCH
+        document.getElementById('global-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const activeGrid = catGrid.classList.contains('hidden') ? countryGrid : catGrid;
+            
+            Array.from(activeGrid.children).forEach(el => {
+                const name = el.getAttribute('data-name').toLowerCase();
+                el.style.display = name.includes(val) ? 'flex' : 'none';
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>

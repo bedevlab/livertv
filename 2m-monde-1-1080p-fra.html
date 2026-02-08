@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    
+    <title>Regarder 2M Monde +1 (1080p) En Direct - Watch 2M Monde +1 (1080p) Live</title>
+    <meta name="description" content="Regarder la chaîne 2M Monde +1 (1080p) en direct gratuitement. Watch 2M Monde +1 (1080p) live stream online on ReeznLive.">
+    <meta name="keywords" content="2M Monde +1 (1080p), live tv, watch online, free streaming, بث مباشر, مشاهدة, قنوات, 2M Monde +1 (1080p) live, reeznlive">
+    
+    <meta property="og:title" content="Regarder 2M Monde +1 (1080p) En Direct - Watch 2M Monde +1 (1080p) Live">
+    <meta property="og:description" content="Watch 2M Monde +1 (1080p) live on ReeznLive. High quality, free streaming.">
+    <meta property="og:image" content="https://i.imgur.com/MvpntzA.png">
+    <meta property="og:type" content="video.other">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap');
+        body { background-color: #000; color: #eee; font-family: 'Montserrat', sans-serif; height: 100vh; overflow: hidden; }
+        .sidebar { background: #080808; border-left: 1px solid #222; }
+        .channel-item { border-bottom: 1px solid #141414; transition: all 0.2s; }
+        .channel-item:hover { background: #1a1a1a; padding-left: 1.2rem; }
+        .channel-item.active { background: #1a0507; border-left: 3px solid #e90020; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e90020; }
+        .video-wrapper { position: relative; overflow: hidden; cursor: default; }
+        .video-wrapper.user-inactive { cursor: none; }
+        .controls-overlay { background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 40%, transparent 100%); opacity: 1; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateY(0); }
+        .video-wrapper.user-inactive .controls-overlay { opacity: 0; transform: translateY(20px); pointer-events: none; }
+        .video-wrapper.paused .controls-overlay { opacity: 1 !important; transform: translateY(0) !important; pointer-events: auto !important; }
+        .progress-container { height: 4px; background: rgba(255,255,255,0.2); cursor: pointer; border-radius: 2px; position: relative; transition: height 0.1s; }
+        .progress-container:hover { height: 6px; }
+        .progress-fill { height: 100%; background: #e90020; width: 0%; position: relative; border-radius: 2px; }
+        .progress-fill::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%) scale(0); width: 12px; height: 12px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: transform 0.1s; }
+        .progress-container:hover .progress-fill::after { transform: translateY(-50%) scale(1); }
+        .progress-buffer { position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.3); width: 0%; z-index: 0; }
+        input[type=range] { accent-color: #e90020; height: 4px; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-left-color: #e90020; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .settings-menu { position: absolute; bottom: 70px; right: 20px; background: rgba(10,10,10,0.95); border: 1px solid #333; border-radius: 6px; padding: 8px 0; min-width: 140px; display: none; flex-direction: column; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .settings-menu.open { display: flex; }
+        .quality-option { padding: 10px 16px; font-size: 12px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 600; color: #aaa; }
+        .quality-option:hover { background: #e90020; color: white; }
+        .quality-option.selected { color: #e90020; }
+        .btn-control { color: #ccc; transition: color 0.2s; }
+        .btn-control:hover { color: #e90020; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <header class="h-16 bg-[#080808] flex items-center justify-between px-6 border-b border-[#222] z-50">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="hover:text-[#e90020] transition-colors">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+            <div class="flex items-center gap-1">
+                <span class="text-lg font-black tracking-tighter text-white">REEZN</span>
+                <span class="text-lg font-black tracking-tighter text-[#e90020]">LIVE</span>
+            </div>
+        </div>
+        <div id="channel-name-display" class="text-xs font-bold uppercase tracking-widest text-[#555]">2M Monde +1 (1080p)</div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <section class="flex-1 bg-black relative flex items-center justify-center video-wrapper paused">
+            <div id="loader" class="absolute z-10 flex flex-col items-center gap-3 hidden">
+                <div class="spinner"></div>
+                <div class="text-xs font-bold uppercase tracking-wider text-gray-500">Buffering</div>
+            </div>
+            <video id="video-player" class="w-full h-full object-contain"></video>
+            <div class="controls-overlay absolute inset-0 flex flex-col justify-end p-6">
+                <div class="progress-container mb-6" id="seek-bar">
+                    <div class="progress-buffer" id="buffer-bar"></div>
+                    <div class="progress-fill" id="play-bar"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <button id="btn-play" class="btn-control"><i data-lucide="play" class="w-8 h-8 fill-current"></i></button>
+                        <div class="flex items-center gap-3 group">
+                            <button id="btn-mute" class="btn-control"><i data-lucide="volume-2" class="w-5 h-5"></i></button>
+                            <input type="range" id="vol-slider" min="0" max="1" step="0.1" value="1" class="w-24 cursor-pointer">
+                        </div>
+                        <div class="text-xs font-mono font-bold text-gray-400"><span id="time-current">00:00</span> / <span id="time-total">00:00</span></div>
+                        <span class="bg-[#e90020] text-white text-[9px] font-black px-2 py-0.5 rounded ml-2 hidden" id="live-badge">LIVE</span>
+                    </div>
+                    <div class="flex items-center gap-5 relative">
+                        <button id="btn-settings" class="btn-control"><i data-lucide="settings" class="w-5 h-5"></i></button>
+                        <div id="quality-menu" class="settings-menu">
+                            <div class="px-4 py-2 text-[10px] text-gray-600 font-bold uppercase border-b border-[#333] mb-1">Stream Quality</div>
+                            <div class="quality-option selected" onclick="changeQuality(-1)">Auto (Adaptive)</div>
+                        </div>
+                        <button id="btn-pip" class="btn-control"><i data-lucide="picture-in-picture-2" class="w-5 h-5"></i></button>
+                        <button id="btn-fullscreen" class="btn-control"><i data-lucide="maximize" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="w-80 sidebar flex flex-col">
+            <div class="p-4 border-b border-[#222]">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-600"></i>
+                    <input type="text" id="search-input" placeholder="Filter channels..." class="w-full bg-[#111] border border-[#222] rounded text-white py-2 pl-10 pr-4 text-xs font-bold focus:border-[#e90020] outline-none transition-colors">
+                </div>
+            </div>
+            <div id="channel-list" class="flex-1 overflow-y-auto">
+                <div class="p-8 text-center text-gray-600 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Channels...</div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // --- INJECTED DATA ---
+        const CURRENT_CHANNEL = {
+            name: "2M Monde +1 (1080p)",
+            url: "https://d2qh3gh0k5vp3v.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-n6pess5lwbghr/2M_ES.m3u8",
+            logo: "https://i.imgur.com/MvpntzA.png"
+        };
+        // This variable now automatically points to the correct language list
+        const RELATED_PLAYLIST = "https://iptv-org.github.io/iptv/languages/fra.m3u";
+
+        const videoWrapper = document.querySelector('.video-wrapper');
+        const video = document.getElementById('video-player');
+        const list = document.getElementById('channel-list');
+        const loader = document.getElementById('loader');
+        const seekBar = document.getElementById('seek-bar');
+        const playBar = document.getElementById('play-bar');
+        const bufferBar = document.getElementById('buffer-bar');
+        const playBtn = document.getElementById('btn-play');
+        const muteBtn = document.getElementById('btn-mute');
+        const settingsBtn = document.getElementById('btn-settings');
+        const qualityMenu = document.getElementById('quality-menu');
+        const pipBtn = document.getElementById('btn-pip');
+        const fullBtn = document.getElementById('btn-fullscreen');
+        const channelDisplay = document.getElementById('channel-name-display');
+        const searchInput = document.getElementById('search-input');
+        
+        let hls = null;
+        let channels = [];
+        let inactivityTimeout;
+
+        // Auto-play main channel
+        if(CURRENT_CHANNEL.url && !CURRENT_CHANNEL.url.includes("STREAM_URL")) {
+            loadStream(CURRENT_CHANNEL, null);
+        }
+
+        // Load specific language sidebar
+        if(RELATED_PLAYLIST && !RELATED_PLAYLIST.includes("PLAYLIST_URL")) {
+            fetch(RELATED_PLAYLIST)
+                .then(r => r.text())
+                .then(parseM3U)
+                .catch(e => console.error("Sidebar load failed", e));
+        }
+
+        function loadStream(ch, el) {
+            document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
+            channelDisplay.textContent = ch.name;
+            
+            loader.style.display = 'flex';
+
+            if(Hls.isSupported()) {
+                if(hls) hls.destroy();
+                hls = new Hls();
+                hls.loadSource(ch.url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    generateQualityOptions(data.levels);
+                    video.play().catch(e => console.log("Autoplay blocked"));
+                });
+                hls.on(Hls.Events.FRAG_BUFFERED, () => { loader.style.display = 'none'; });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = ch.url;
+                video.play();
+            }
+        }
+
+        function parseM3U(data) {
+            const lines = data.split('\n');
+            channels = [];
+            let current = {};
+            lines.forEach(line => {
+                line = line.trim();
+                if(line.startsWith('#EXTINF:')) {
+                    const info = line.split(',');
+                    current.name = info[1] ? info[1].trim() : "Unknown";
+                    const logo = line.match(/tvg-logo="([^"]+)"/);
+                    current.logo = logo ? logo[1] : null;
+                } else if(line.startsWith('http')) {
+                    current.url = line.split('|')[0];
+                    channels.push({...current});
+                    current = {};
+                }
+            });
+            renderChannels(channels);
+        }
+
+        function renderChannels(data) {
+            list.innerHTML = '';
+            data.forEach((ch, idx) => {
+                const div = document.createElement('div');
+                div.className = 'channel-item p-3 flex items-center gap-3 cursor-pointer group';
+                if(ch.name === CURRENT_CHANNEL.name) div.classList.add('active');
+                
+                div.innerHTML = `
+                    <div class="w-10 h-10 bg-[#111] rounded flex items-center justify-center overflow-hidden flex-shrink-0 border border-[#222]">
+                        ${ch.logo ? `<img src="${ch.logo}" class="w-full h-full object-contain" onerror="this.style.display='none'">` : `<i data-lucide="tv" class="w-4 h-4 text-[#333]"></i>`}
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-xs font-bold truncate text-gray-300 group-hover:text-white">${ch.name}</div>
+                    </div>
+                `;
+                div.onclick = () => loadStream(ch, div);
+                list.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        playBtn.onclick = () => video.paused ? video.play() : video.pause();
+        video.onplay = () => { playBtn.innerHTML = `<i data-lucide="pause" class="w-8 h-8 fill-current"></i>`; lucide.createIcons(); videoWrapper.classList.remove('paused'); };
+        video.onpause = () => { playBtn.innerHTML = `<i data-lucide="play" class="w-8 h-8 fill-current"></i>`; lucide.createIcons(); videoWrapper.classList.add('paused'); };
+        
+        fullBtn.onclick = () => !document.fullscreenElement ? videoWrapper.requestFullscreen() : document.exitFullscreen();
+        
+        function generateQualityOptions(levels) {
+            qualityMenu.innerHTML = `<div class="px-4 py-2 text-[10px] text-gray-600 font-bold uppercase border-b border-[#333] mb-1">Stream Quality</div>`;
+            if(levels) levels.forEach((lvl, i) => {
+                const item = document.createElement('div');
+                item.className = 'quality-option';
+                item.innerText = `${lvl.height}p`;
+                item.onclick = () => { hls.currentLevel = i; };
+                qualityMenu.appendChild(item);
+            });
+        }
+        settingsBtn.onclick = () => qualityMenu.classList.toggle('open');
+        lucide.createIcons();
+    </script>
+</body>
+</html>
