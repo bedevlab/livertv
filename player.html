@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>ReeznLive Player</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap');
+        
+        body {
+            background-color: #000;
+            color: #eee;
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            background: #080808;
+            border-left: 1px solid #222;
+        }
+
+        .channel-item {
+            border-bottom: 1px solid #141414;
+            transition: all 0.2s;
+        }
+
+        .channel-item:hover {
+            background: #1a1a1a;
+            padding-left: 1.2rem;
+        }
+
+        .channel-item.active {
+            background: #1a0507;
+            border-left: 3px solid #e90020;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e90020; }
+
+        /* Player Controls & Visibility Logic */
+        .video-wrapper {
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        /* Hide cursor when inactive */
+        .video-wrapper.user-inactive {
+            cursor: none;
+        }
+
+        .controls-overlay {
+            background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 40%, transparent 100%);
+            opacity: 1;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform: translateY(0);
+        }
+
+        /* Hide controls state */
+        .video-wrapper.user-inactive .controls-overlay {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+
+        /* Always show controls if paused */
+        .video-wrapper.paused .controls-overlay {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+        }
+
+        /* Seek Bar */
+        .progress-container {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            border-radius: 2px;
+            position: relative;
+            transition: height 0.1s;
+        }
+        
+        .progress-container:hover { height: 6px; }
+
+        .progress-fill {
+            height: 100%;
+            background: #e90020;
+            width: 0%;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        
+        .progress-container:hover .progress-fill::after { transform: translateY(-50%) scale(1); }
+        
+        .progress-buffer {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            background: rgba(255,255,255,0.3);
+            width: 0%;
+            z-index: 0;
+        }
+
+        /* Volume Slider */
+        input[type=range] {
+            accent-color: #e90020;
+            height: 4px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #e90020;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Settings Menu */
+        .settings-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            background: rgba(10,10,10,0.95);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px 0;
+            min-width: 140px;
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .settings-menu.open { display: flex; }
+        .quality-option {
+            padding: 10px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #aaa;
+        }
+        .quality-option:hover { background: #e90020; color: white; }
+        .quality-option.selected { color: #e90020; }
+        .quality-option.selected:hover { color: white; }
+
+        .btn-control {
+            color: #ccc;
+            transition: color 0.2s;
+        }
+        .btn-control:hover { color: #e90020; }
+
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <header class="h-16 bg-[#080808] flex items-center justify-between px-6 border-b border-[#222] z-50">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="hover:text-[#e90020] transition-colors">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+            <div class="flex items-center gap-1">
+                <span class="text-lg font-black tracking-tighter text-white">REEZN</span>
+                <span class="text-lg font-black tracking-tighter text-[#e90020]">LIVE</span>
+            </div>
+        </div>
+        <div id="channel-name-display" class="text-xs font-bold uppercase tracking-widest text-[#555]">Select Channel</div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <section class="flex-1 bg-black relative flex items-center justify-center video-wrapper paused">
+            
+            <div id="loader" class="absolute z-10 flex flex-col items-center gap-3 hidden">
+                <div class="spinner"></div>
+                <div class="text-xs font-bold uppercase tracking-wider text-gray-500">Buffering</div>
+            </div>
+
+            <video id="video-player" class="w-full h-full object-contain"></video>
+
+            <div class="controls-overlay absolute inset-0 flex flex-col justify-end p-6">
+                
+                <div class="progress-container mb-6" id="seek-bar">
+                    <div class="progress-buffer" id="buffer-bar"></div>
+                    <div class="progress-fill" id="play-bar"></div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <button id="btn-play" class="btn-control">
+                            <i data-lucide="play" class="w-8 h-8 fill-current"></i>
+                        </button>
+                        
+                        <div class="flex items-center gap-3 group">
+                            <button id="btn-mute" class="btn-control">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                            <input type="range" id="vol-slider" min="0" max="1" step="0.1" value="1" class="w-24 cursor-pointer">
+                        </div>
+
+                        <div class="text-xs font-mono font-bold text-gray-400">
+                            <span id="time-current">00:00</span> / <span id="time-total">00:00</span>
+                        </div>
+                        
+                        <span class="bg-[#e90020] text-white text-[9px] font-black px-2 py-0.5 rounded ml-2 hidden" id="live-badge">LIVE</span>
+                    </div>
+
+                    <div class="flex items-center gap-5 relative">
+                        <button id="btn-settings" class="btn-control">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                        </button>
+                        
+                        <div id="quality-menu" class="settings-menu">
+                            <div class="px-4 py-2 text-[10px] text-gray-600 font-bold uppercase border-b border-[#333] mb-1">Stream Quality</div>
+                            <div class="quality-option selected" onclick="changeQuality(-1)">Auto (Adaptive)</div>
+                        </div>
+
+                        <button id="btn-pip" class="btn-control">
+                            <i data-lucide="picture-in-picture-2" class="w-5 h-5"></i>
+                        </button>
+                        
+                        <button id="btn-fullscreen" class="btn-control">
+                            <i data-lucide="maximize" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="w-80 sidebar flex flex-col">
+            <div class="p-4 border-b border-[#222]">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-600"></i>
+                    <input type="text" id="search-input" placeholder="Filter channels..." 
+                           class="w-full bg-[#111] border border-[#222] rounded text-white py-2 pl-10 pr-4 text-xs font-bold focus:border-[#e90020] outline-none transition-colors">
+                </div>
+            </div>
+            <div id="channel-list" class="flex-1 overflow-y-auto">
+                <div class="p-8 text-center text-gray-600 text-xs font-bold uppercase tracking-widest animate-pulse">Initializing...</div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // DOM Elements
+        const videoWrapper = document.querySelector('.video-wrapper');
+        const video = document.getElementById('video-player');
+        const list = document.getElementById('channel-list');
+        const loader = document.getElementById('loader');
+        const seekBar = document.getElementById('seek-bar');
+        const playBar = document.getElementById('play-bar');
+        const bufferBar = document.getElementById('buffer-bar');
+        const playBtn = document.getElementById('btn-play');
+        const muteBtn = document.getElementById('btn-mute');
+        const settingsBtn = document.getElementById('btn-settings');
+        const qualityMenu = document.getElementById('quality-menu');
+        const pipBtn = document.getElementById('btn-pip');
+        const fullBtn = document.getElementById('btn-fullscreen');
+        const channelDisplay = document.getElementById('channel-name-display');
+        const searchInput = document.getElementById('search-input');
+        
+        // HLS Instance
+        let hls = null;
+        let channels = [];
+        let inactivityTimeout;
+        let currentHeaders = {}; // Store current stream headers
+
+        // --- UI AUTO HIDE LOGIC ---
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            videoWrapper.classList.remove('user-inactive');
+            
+            if(!video.paused) {
+                inactivityTimeout = setTimeout(() => {
+                    videoWrapper.classList.add('user-inactive');
+                    qualityMenu.classList.remove('open');
+                }, 3000);
+            }
+        }
+
+        videoWrapper.addEventListener('mousemove', resetInactivityTimer);
+        videoWrapper.addEventListener('click', resetInactivityTimer);
+        videoWrapper.addEventListener('keydown', resetInactivityTimer);
+
+
+        // --- INIT ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const playlistUrl = urlParams.get('playlist');
+
+        if(playlistUrl) {
+            fetch(playlistUrl)
+                .then(r => r.text())
+                .then(parseM3U)
+                .catch(e => list.innerHTML = `<div class="p-6 text-red-600 text-xs font-bold text-center">CONNECTION FAILURE</div>`);
+        } else {
+            list.innerHTML = `<div class="p-6 text-gray-600 text-xs font-bold text-center">NO SOURCE SIGNAL</div>`;
+        }
+
+        // --- M3U PARSER WITH HEADERS SUPPORT ---
+        function parseM3U(data) {
+            const lines = data.split('\n');
+            channels = [];
+            let current = {};
+
+            lines.forEach(line => {
+                line = line.trim();
+                if(line.startsWith('#EXTINF:')) {
+                    const info = line.split(',');
+                    current.name = info[1] ? info[1].trim() : "Unknown Channel";
+                    const logo = line.match(/tvg-logo="([^"]+)"/);
+                    current.logo = logo ? logo[1] : null;
+                    
+                    // Try to catch custom headers in EXTINF if they exist (rare)
+                    const ua = line.match(/user-agent="([^"]+)"/i);
+                    if(ua) current.userAgent = ua[1];
+                    
+                } else if(line.startsWith('http')) {
+                    // PARSE PIPE (|) FOR HEADERS
+                    // Format: http://url|User-Agent=XXX&Referer=YYY
+                    if(line.includes('|')) {
+                        const parts = line.split('|');
+                        current.url = parts[0];
+                        const headersPart = parts[1];
+                        
+                        const params = new URLSearchParams(headersPart.replace(/&/g, '&'));
+                        if(params.get('User-Agent')) current.userAgent = params.get('User-Agent');
+                        if(params.get('Referer')) current.referer = params.get('Referer');
+                    } else {
+                        current.url = line;
+                    }
+
+                    channels.push({...current});
+                    current = {};
+                }
+            });
+            renderChannels(channels);
+        }
+
+        function renderChannels(data) {
+            list.innerHTML = '';
+            data.forEach((ch, idx) => {
+                const div = document.createElement('div');
+                div.className = 'channel-item p-3 flex items-center gap-3 cursor-pointer group';
+                div.innerHTML = `
+                    <div class="w-10 h-10 bg-[#111] rounded flex items-center justify-center overflow-hidden flex-shrink-0 border border-[#222] group-hover:border-[#e90020] transition-colors">
+                        ${ch.logo ? `<img src="${ch.logo}" class="w-full h-full object-contain p-1" onerror="this.style.display='none'">` : `<i data-lucide="tv" class="w-4 h-4 text-[#333]"></i>`}
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-xs font-bold truncate text-gray-300 group-hover:text-white transition-colors">${ch.name}</div>
+                        <div class="text-[9px] text-gray-600 font-mono mt-0.5">CH-${String(idx+1).padStart(3, '0')}</div>
+                    </div>
+                `;
+                div.onclick = () => loadStream(ch, div);
+                list.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function loadStream(ch, el) {
+            // 1. VISUAL UPDATES
+            document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
+            channelDisplay.textContent = ch.name;
+            
+            // 2. FORCE RESET LOADER (Fixes "Stuck Error" bug)
+            loader.innerHTML = `
+                <div class="spinner"></div>
+                <div class="text-xs font-bold uppercase tracking-wider text-gray-500">Buffering</div>
+            `;
+            loader.style.display = 'flex';
+            
+            // 3. STORE HEADERS FOR XHR SETUP
+            currentHeaders = {
+                'User-Agent': ch.userAgent || '',
+                'Referer': ch.referer || ''
+            };
+
+            // 4. HLS SETUP
+            if(Hls.isSupported()) {
+                if(hls) hls.destroy();
+                
+                hls = new Hls({
+                    xhrSetup: function(xhr, url) {
+                        // Attempt to set headers. Note: Browsers may block 'User-Agent' and 'Referer'
+                        // but this is the correct implementation logic.
+                        if(currentHeaders['User-Agent']) {
+                            // xhr.setRequestHeader('User-Agent', currentHeaders['User-Agent']);
+                        }
+                        if(currentHeaders['Referer']) {
+                            // xhr.setRequestHeader('Referer', currentHeaders['Referer']);
+                        }
+                    },
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                
+                hls.loadSource(ch.url);
+                hls.attachMedia(video);
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    generateQualityOptions(data.levels);
+                    video.play().catch(e => console.log("Autoplay blocked"));
+                });
+
+                hls.on(Hls.Events.FRAG_BUFFERED, () => { 
+                    loader.style.display = 'none'; 
+                });
+                
+                hls.on(Hls.Events.ERROR, (e, data) => {
+                    if(data.fatal) {
+                         loader.innerHTML = `<div class="text-[#e90020] font-black text-xs">SIGNAL LOST</div>`;
+                    }
+                });
+
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari / Native HLS
+                video.src = ch.url;
+                video.play();
+                video.onloadedmetadata = () => { loader.style.display = 'none'; };
+                video.onerror = () => {
+                     loader.innerHTML = `<div class="text-[#e90020] font-black text-xs">SIGNAL LOST</div>`;
+                };
+            }
+        }
+
+        // --- CONTROLS ---
+        
+        playBtn.onclick = () => {
+            if(video.paused) video.play();
+            else video.pause();
+        };
+
+        // Sync State & UI Visibility
+        video.onplay = () => {
+            playBtn.innerHTML = `<i data-lucide="pause" class="w-8 h-8 fill-current"></i>`;
+            lucide.createIcons();
+            videoWrapper.classList.remove('paused');
+            resetInactivityTimer();
+        };
+
+        video.onpause = () => {
+            playBtn.innerHTML = `<i data-lucide="play" class="w-8 h-8 fill-current"></i>`;
+            lucide.createIcons();
+            videoWrapper.classList.add('paused'); 
+            clearTimeout(inactivityTimeout); 
+            videoWrapper.classList.remove('user-inactive');
+        };
+
+        // Volume
+        document.getElementById('vol-slider').oninput = (e) => {
+            video.volume = e.target.value;
+            muteBtn.innerHTML = video.volume === 0 ? `<i data-lucide="volume-x" class="w-5 h-5"></i>` : `<i data-lucide="volume-2" class="w-5 h-5"></i>`;
+            lucide.createIcons();
+        };
+        
+        muteBtn.onclick = () => {
+            if(video.volume > 0) {
+                video.dataset.vol = video.volume;
+                video.volume = 0;
+                document.getElementById('vol-slider').value = 0;
+            } else {
+                video.volume = video.dataset.vol || 1;
+                document.getElementById('vol-slider').value = video.volume;
+            }
+        };
+
+        // Fullscreen
+        fullBtn.onclick = () => {
+            if(!document.fullscreenElement) video.parentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
+
+        // PIP
+        pipBtn.onclick = () => {
+            if(document.pictureInPictureElement) document.exitPictureInPicture();
+            else video.requestPictureInPicture();
+        };
+
+        // Seek & Time
+        video.ontimeupdate = () => {
+            const pct = (video.currentTime / video.duration) * 100;
+            playBar.style.width = `${pct}%`;
+            
+            if(video.buffered.length > 0) {
+                const bufPct = (video.buffered.end(video.buffered.length - 1) / video.duration) * 100;
+                bufferBar.style.width = `${bufPct}%`;
+            }
+
+            document.getElementById('time-current').innerText = formatTime(video.currentTime);
+            document.getElementById('time-total').innerText = formatTime(video.duration);
+
+            if(video.duration === Infinity) {
+                document.getElementById('live-badge').style.display = 'inline-block';
+                document.getElementById('time-total').innerText = "";
+            } else {
+                document.getElementById('live-badge').style.display = 'none';
+            }
+        };
+
+        seekBar.onclick = (e) => {
+            const rect = seekBar.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        };
+
+        // --- QUALITY SELECTOR ---
+        function generateQualityOptions(levels) {
+            qualityMenu.innerHTML = `<div class="px-4 py-2 text-[10px] text-gray-600 font-bold uppercase border-b border-[#333] mb-1">Stream Quality</div>`;
+            const autoBtn = document.createElement('div');
+            autoBtn.className = 'quality-option selected';
+            autoBtn.innerText = 'Auto (Adaptive)';
+            autoBtn.onclick = () => changeQuality(-1, autoBtn);
+            qualityMenu.appendChild(autoBtn);
+
+            if(levels) {
+                levels.forEach((lvl, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'quality-option';
+                    item.innerText = `${lvl.height}p ${lvl.bitrate ? `(${(lvl.bitrate/1000000).toFixed(1)} Mbps)` : ''}`;
+                    item.onclick = () => changeQuality(index, item);
+                    qualityMenu.appendChild(item);
+                });
+            }
+        }
+
+        function changeQuality(levelIndex, element) {
+            hls.currentLevel = levelIndex;
+            document.querySelectorAll('.quality-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            qualityMenu.classList.remove('open');
+        }
+
+        settingsBtn.onclick = () => qualityMenu.classList.toggle('open');
+
+        // Search
+        searchInput.oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = channels.filter(c => c.name.toLowerCase().includes(term));
+            renderChannels(filtered);
+        };
+
+        function formatTime(s) {
+            if(isNaN(s) || s === Infinity) return "00:00";
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        // Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+            if(e.key === 'f') fullBtn.click();
+            if(e.key === 'm') muteBtn.click();
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
